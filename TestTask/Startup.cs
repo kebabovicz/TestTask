@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TestTask.DTOs;
 using TestTask.Models;
 
 namespace TestTask
@@ -38,6 +40,22 @@ namespace TestTask
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            TypeAdapterConfig<Product, ProductDto>
+                .NewConfig()
+                .Map(dest => dest.ProductName, src => src.ProductName)
+                .Map(dest => dest.Url, src => src.Url)
+                .Map(dest => dest.Description, src => src.Description)
+                .Map(dest => dest.Price, src => src.Price)
+                .Map(dest => dest.Weight, src => src.Weight)
+                .Map(dest => dest.CategoryName, src => src.Category.CategoryName)
+                .IgnoreNullValues(true);
+
+            TypeAdapterConfig<ProductParameter, ProductParameterDto>
+                .NewConfig()
+                .Map(dest => dest.Name, src => src.CustomParameter.Name)
+                .Map(dest => dest.Value, src => src.Value)
+                .IgnoreNullValues(true);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
