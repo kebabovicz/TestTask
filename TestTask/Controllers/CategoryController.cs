@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Mapster;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,22 +27,18 @@ namespace TestTask.Controllers
 
             var result = new List<CategoryDto>();
 
-            foreach (var item in listData)
-            {
-                var parameters = _context.CustomParameters.Where(x => x.CategoryId == item.Id).ToList();
+            var parameters = _context.CustomParameters.ToList();
 
+            foreach (var item in listData)
+            {               
                 var productParameterDtos = new List<ProductParameterDto>();
 
-                productParameterDtos = parameters.Select(x => new ProductParameterDto
-                {
-                    Name = x.Name
-                }).ToList();
+                var customParameters = parameters.Where(x => x.CategoryId == item.Id).ToList();
 
-                result.Add(new CategoryDto
-                {
-                    Name = item.CategoryName,
-                    ProductParameterDtos = productParameterDtos
-                });
+                var category = item.Adapt<CategoryDto>();
+                category.ProductParameterDtos = customParameters.Adapt<List<ProductParameterDto>>();
+
+                result.Add(category);
             }
 
             return Ok(result);

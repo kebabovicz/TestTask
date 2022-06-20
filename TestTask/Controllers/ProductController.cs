@@ -25,19 +25,21 @@ namespace TestTask.Controllers
             var listData = await _context.Products.ToListAsync();
 
             var result = new List<ProductDto>();
-             
+
+            var parameters = _context.ProductParameters.ToList();
+
             foreach (var item in listData)
             {
                 var productParameterDtos = new List<ProductParameterDto>();
 
-                var parameters = _context.ProductParameters.Where(x => x.ProductId == item.Id).ToList();
+                var productParameters = parameters.Where(x => x.ProductId == item.Id).ToList();
 
                 var product = item.Adapt<ProductDto>();
-                product.ProductParameterDtos = parameters.Adapt<List<ProductParameterDto>>();
+                product.ProductParameterDtos = productParameters.Adapt<List<ProductParameterDto>>();
 
                 result.Add(product);
             }
-            
+
             return Ok(result);
         }
 
