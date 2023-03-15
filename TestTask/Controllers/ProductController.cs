@@ -38,7 +38,7 @@ namespace TestTask.Controllers
                     var productDto = item.Adapt<ProductDto>();
                     if(parametersList.TryGetValue(item.Id, out var customParameters))
                     {
-                        productDto.ProductParameterDtos = customParameters.Adapt<List<ProductParameterDto>>()
+                        productDto.ProductParameterDtos = customParameters.Adapt<List<ProductParameterDto>>();
                     }
                     return productDto;
                         

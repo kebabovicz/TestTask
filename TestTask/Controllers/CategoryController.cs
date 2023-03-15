@@ -76,6 +76,8 @@ namespace TestTask.Controllers
 
             _context.Remove(category);
 
+            await _context.SaveChangesAsync();
+
             return Ok();
         }
     }
