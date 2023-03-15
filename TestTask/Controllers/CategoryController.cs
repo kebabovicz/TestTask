@@ -25,21 +25,25 @@ namespace TestTask.Controllers
         {
             var listData = await _context.Categories.ToListAsync();
 
-            var result = new List<CategoryDto>();
+            var parameters = await _context.CustomParameters
+                .Where(x => listData.Any(c => c.Id == x.CategoryId))
+                .ToListAsync();
 
-            var parameters = _context.CustomParameters.ToList();
+            var parametersList = parameters
+                .GroupBy(x => x.CategoryId)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-            foreach (var item in listData)
-            {               
-                var productParameterDtos = new List<ProductParameterDto>();
-
-                var customParameters = parameters.Where(x => x.CategoryId == item.Id).ToList();
-
-                var category = item.Adapt<CategoryDto>();
-                category.ProductParameterDtos = customParameters.Adapt<List<ProductParameterDto>>();
-
-                result.Add(category);
-            }
+            var result = listData
+                .Select(item =>
+                {
+                    var categoryDto = item.Adapt<CategoryDto>();
+                    if (parametersList.TryGetValue(item.Id, out var customParameters))
+                    {
+                        categoryDto.ProductParameterDtos = customParameters.Adapt<List<ProductParameterDto>>();
+                    }
+                    return categoryDto;
+                })
+                .ToList();
 
             return Ok(result);
         }
