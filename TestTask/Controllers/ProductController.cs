@@ -58,19 +58,29 @@ namespace TestTask.Controllers
             data.Url = productDto.Url;
             data.Price = productDto.Price;
 
-            var category = await _context.Categories.FirstOrDefaultAsync(x => x.CategoryName == productDto.CategoryName);
+            var category = await _context.Categories.SingleOrDefaultAsync(x => x.CategoryName == productDto.CategoryName);
             data.CategoryId = category.Id;
 
-            foreach(var item in productDto.ProductParameterDtos)
+            var parameterNames = productDto.ProductParameterDtos.Select(p => p.Name);
+            var productParameters = await _context.ProductParameters
+                .Include(p => p.CustomParameter)
+                .Where(p => parameterNames.Contains(p.CustomParameter.Name))
+                .ToListAsync();
+
+            foreach (var item in productDto.ProductParameterDtos)
             {
-                var parameter = await _context.ProductParameters.FirstOrDefaultAsync(x => x.CustomParameter.Name == item.Name);
-                parameter.Value = item.Value;
+                var parameter = productParameters.SingleOrDefault(p => p.CustomParameter.Name == item.Name);
+                if (parameter != null)
+                {
+                    parameter.Value = item.Value;
+                    _context.ProductParameters.Add(parameter);
+                }
             }
 
-            await _context.Products.AddAsync(data);
+            await _context.Products.AddRangeAsync(data);
 
             await _context.SaveChangesAsync();
-            
+
             return Ok();
         }
     }
